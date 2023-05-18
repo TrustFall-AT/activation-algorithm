@@ -2,15 +2,18 @@ from copy import deepcopy
 from math import *
 
 import numpy as np
-
+import h5py, doctest
 from functions import *
 import tensorflow as tf
-
+import matplotlib.pyplot as plt
+import os, sys
 #print(tf.zeros(2,2,2))
 # testEntry = Entry(1, 2, 2, 2, 3, 3, 3)
 # print(testEntry.acc)
 
 #input("Press enter to continue 1")
+
+
 
 filePath = "arduino-data/falling/Sumanth_falling_5_10_23.txt"
 
@@ -203,21 +206,55 @@ print(len(data_for_model_x)); print(len(data_for_model_y))
 #Make some structure
 model = tf.keras.models.Sequential([
     tf.keras.layers.Input(shape=(len(train_x[0]),)),
-    tf.keras.layers.Dense(10, activation='relu'),
-    tf.keras.layers.Dense(10, activation='relu'),
+    tf.keras.layers.Dense(4, activation='relu'),
+    tf.keras.layers.Dense(4, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
-model.compile(optimizer='adam', loss='mean_squared_error')
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
 
 
 #Train the model
 #[e1, e2, e3...] = x
+def run_ml_model():
+    num_epochs = 20
+    history = model.fit(train_x, train_y, epochs=num_epochs)
+    model.save('model_weights.h5') # save the weights
+    #test the model
+    print(test_x[:2])
+    print(test_y[:2])
+    model.evaluate(test_x, test_y)
+    print(history.history['accuracy'])
+    input("Press [ENTER] to Continue...")
+    plt.title("Accuracy of activation algorithm over time")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy (%)")
+    plt.xticks(np.arange(1, num_epochs + 1, 1))
+    plt.ylim(97.5, 100)
+    accuracies = [i * 100 for i in history.history['accuracy']]
+    x_axis_values = [(i + 1) for i in list(range(len(accuracies)))]
+    plt.plot(x_axis_values, accuracies, marker='o')
+    plt.savefig('ml_graph.png')
+    plt.show()
 
-model.fit(train_x, train_y, epochs=20)
-#test the model
-print(test_x[:2])
-print(test_y[:2])
-model.evaluate(test_x, test_y)
+    delete = input("Delete graph?")
+    if delete in ['T', 't']:
+        if os.path.exists('ml_graph.png'):
+            os.remove('ml_graph.png')
+    else:
+        print("It has not been deleted")
+        exit()
+
+# while True:
+#     run_ml_model()
+
+model = tf.keras.models.load_model('model_weights.h5')
+weights = model.get_weights()
+
+with open('model_weights.txt', 'w') as f:
+    for weight in weights:
+        f.write(str(weight.tolist()) + "\n")
+# loss = history.history
+# print(f'Historical accuracy: {loss}')
 # model.export("ml_weights.txt")
 
 # goodEntry = Entry(32, 312, 312, 543, 123, 54, 123)
