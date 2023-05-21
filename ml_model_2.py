@@ -248,11 +248,12 @@ def run_ml_model():
 #     run_ml_model()
 
 model = tf.keras.models.load_model('model_weights.h5')
-weights = model.get_weights()
+weights = model.get_weights()   
 
-with open('model_weights.txt', 'w') as f:
-    for weight in weights:
-        f.write(str(weight.tolist()) + "\n")
+
+# with open('model_weights.txt', 'w') as f:
+#     for weight in weights:
+#         f.write(str(weight.tolist()) + "\n")
 # loss = history.history
 # print(f'Historical accuracy: {loss}')
 # model.export("ml_weights.txt")
